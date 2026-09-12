@@ -2,6 +2,7 @@ using Agenda.Data;
 using Agenda.DTO;
 using Agenda.Models;
 using DTO.requests;
+using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services
 {
@@ -14,7 +15,10 @@ namespace Agenda.Services
         }
         public async Task<List<PessoaResponseDTO>> ListAllPessoas()
         {
-            List<PessoaResponseDTO> pessoas = db.Pessoas.Where(u => u.isActive).Select(u => new PessoaResponseDTO(u)).ToList();
+            var pessoas = await db.Pessoas
+                .Where(u => u.IsActive)
+                .Select(u => new PessoaResponseDTO(u))
+                .ToListAsync();
             return pessoas;
         }
 
@@ -23,7 +27,7 @@ namespace Agenda.Services
             if (string.IsNullOrEmpty(cpf))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
 
-            var pessoa = db.Pessoas.FirstOrDefault(u => u.CPF == cpf && u.isActive);
+            var pessoa = await db.Pessoas.FirstOrDefaultAsync(u => u.CPF == cpf && u.IsActive);
             if (pessoa == null)
                 throw new KeyNotFoundException("Pessoa não encontrada.");
             return new PessoaResponseDTO(pessoa);
@@ -34,18 +38,19 @@ namespace Agenda.Services
             if (string.IsNullOrEmpty(cpf))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
 
-            var pessoa = db.Pessoas.FirstOrDefault(u => u.CPF == cpf && u.isActive);
+            var pessoa = await db.Pessoas.FirstOrDefaultAsync(u => u.CPF == cpf && u.IsActive);
             if (pessoa == null)
                 throw new KeyNotFoundException("Pessoa não encontrada.");
             return pessoa;
         }
 
-        private async Task<Boolean> ExistsWithCPF(string cpf)
+        private async Task<bool> ExistsWithCPF(string cpf, Guid? ignorarId = null)
         {
             if (string.IsNullOrEmpty(cpf))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
 
-            return db.Pessoas.Any(u => u.CPF == cpf);
+            return await db.Pessoas
+                .AnyAsync(u => u.CPF == cpf && (ignorarId == null || u.Id != ignorarId));
         }
 
         public async Task<PessoaResponseDTO> CreatePessoa(PessoaRequestDTO nova_pessoa)
@@ -65,31 +70,31 @@ namespace Agenda.Services
             return new PessoaResponseDTO(pessoa);
         }
 
-        public async Task<PessoaResponseDTO> UpdatePessoa(string CPF, PessoaRequestDTO nova_pessoa)
+        public async Task<PessoaResponseDTO> UpdatePessoa(string CPF, PessoaRequestDTO novaPessoa)
         {
             Pessoa existente = await FindByCPFInternal(CPF);
-            if (!string.IsNullOrEmpty(nova_pessoa.Name))
+            if (!string.IsNullOrEmpty(novaPessoa.Name))
             {
-                existente.Name = nova_pessoa.Name;
+                existente.Name = novaPessoa.Name;
             }
-            if (!string.IsNullOrEmpty(nova_pessoa.CPF))
+            if (!string.IsNullOrEmpty(novaPessoa.CPF))
             {
-                if(await ExistsWithCPF(nova_pessoa.CPF))
+                if (await ExistsWithCPF(novaPessoa.CPF, existente.Id))   // ignora ela mesma
                     throw new ArgumentException("Já existe um usuário cadastrado com este CPF.");
-                existente.CPF = nova_pessoa.CPF;
+                existente.CPF = novaPessoa.CPF;
             }
-            if (nova_pessoa.BirthDate != DateOnly.MinValue)
+            if (novaPessoa.BirthDate != DateOnly.MinValue)
             {
-                existente.BirthDate = nova_pessoa.BirthDate;
+                existente.BirthDate = novaPessoa.BirthDate;
             }
             await db.SaveChangesAsync();
             return new PessoaResponseDTO(existente);
         }
 
-        public async Task<Boolean> DeletePessoa(string CPF)
+        public async Task<bool> DeletePessoa(string CPF)
         {
             Pessoa existente = await FindByCPFInternal(CPF);
-            existente.isActive = false;
+            existente.IsActive = false;
             await db.SaveChangesAsync();
             return true;
         }

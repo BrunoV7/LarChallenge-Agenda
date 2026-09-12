@@ -6,10 +6,11 @@ namespace Agenda.Models
         public string Name { get; set;} = "";
         public string CPF { get; set;} = "";
         public  DateOnly BirthDate { get; set; }
-        public bool isActive { get; set; } = true;
+        public bool IsActive { get; set; } = true;
 
         public Pessoa(string _Name, string _CPF, DateOnly _BirthDate)
         {
+            this.Id = Guid.CreateVersion7();
             this.Name = _Name;
             this.CPF = _CPF;
             this.BirthDate = _BirthDate;
