@@ -18,8 +18,8 @@ namespace Agenda.Middleware
             var (status, detail) = exception switch
             {
                 KeyNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
-                ArgumentException    => (StatusCodes.Status400BadRequest, exception.Message),
-                _                    => (StatusCodes.Status500InternalServerError, "Ocorreu um erro interno no servidor.")
+                ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),
+                _ => (StatusCodes.Status500InternalServerError, "Ocorreu um erro interno no servidor.")
             };
 
             httpContext.Response.StatusCode = status;

@@ -1,45 +1,41 @@
-using System.Collections;
 using Agenda.DTO;
-using Agenda.Models;
-using Agenda.Services;
 using DTO.requests;
+using Agenda.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Agenda.Controllers
 {
     [ApiController]
     [Route("api/pessoas")]
-    public class PessoaController(
-        PessoaService service
-    ) : ControllerBase
+    public class PessoaController(PessoaService service) : ControllerBase
     {
-
-        [HttpGet("find/{cpf}")]
-        public async Task<ActionResult<PessoaResponseDTO>> BuscarPorCPF(string cpf)
-        {
-            return Ok(await service.FindByCPF(cpf));
-        }
-        [HttpGet("find/all")]
-        public async Task<ActionResult<IEnumerable<PessoaResponseDTO>>> GetAllActivePersons()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PessoaResponseDTO>>> BuscarTodos()
         {
             return Ok(await service.ListAllPessoas());
         }
 
-        [HttpPost("create")]
+        [HttpGet("{cpf}")]
+        public async Task<ActionResult<PessoaResponseDTO>> BuscarPorCpf(string cpf)
+        {
+            return Ok(await service.FindByCPF(cpf));
+        }
+
+        [HttpPost]
         public async Task<ActionResult<PessoaResponseDTO>> Criar([FromBody] PessoaRequestDTO pessoa)
         {
             var criada = await service.CreatePessoa(pessoa);
-            return CreatedAtAction(nameof(BuscarPorCPF), new { cpf = criada.CPF }, criada);
+            return CreatedAtAction(nameof(BuscarPorCpf), new { cpf = criada.CPF }, criada);
         }
 
-        [HttpPut("update/{cpf}")]
-        public async Task<ActionResult<PessoaResponseDTO>> AtualizarPessoa([FromBody] PessoaRequestDTO pessoa, string cpf)
+        [HttpPut("{cpf}")]
+        public async Task<ActionResult<PessoaResponseDTO>> Atualizar(string cpf, [FromBody] PessoaRequestDTO pessoa)
         {
             return Ok(await service.UpdatePessoa(cpf, pessoa));
         }
 
-        [HttpDelete("delete/{cpf}")]
-        public async Task<IActionResult> DeletarPessoa(string cpf)
+        [HttpDelete("{cpf}")]
+        public async Task<IActionResult> Deletar(string cpf)
         {
             await service.DeletePessoa(cpf);
             return NoContent();

@@ -4,10 +4,10 @@ namespace Agenda.DTO
 {
     public class PessoaResponseDTO
     {
-        public Guid Id { get; set;}
-        public string Name { get; set;} = "";
-        public string CPF { get; set;} = "";
-        public DateOnly BirthDate { get; set;}
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public string CPF { get; set; } = "";
+        public DateOnly BirthDate { get; set; }
 
         public PessoaResponseDTO(Pessoa pessoa)
         {
