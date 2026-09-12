@@ -1,5 +1,6 @@
 
 
+using System.Text.Json.Serialization;
 using Agenda.Data;
 using Agenda.Middleware;
 using Agenda.Services;
@@ -11,6 +12,11 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<PessoaService>();
+builder.Services.AddScoped<TelefoneService>();
+builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(configure =>

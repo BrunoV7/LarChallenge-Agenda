@@ -8,10 +8,6 @@ namespace DTO.requests
         public string Name { get; set; } = "";
         public string CPF { get; set; } = "";
         public DateOnly BirthDate { get; set; }
-
-        public Pessoa toPessoa()
-        {
-            return new Pessoa(this.Name, this.CPF, this.BirthDate);
-        }
+        
     }
 }

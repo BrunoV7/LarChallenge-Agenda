@@ -10,10 +10,13 @@ namespace Agenda.Services
     {
         public async Task<List<PessoaResponseDTO>> ListAllPessoas()
         {
-            return await db.Pessoas
+            var pessoas = await db.Pessoas
+                .Include(p => p.Telefones)
                 .Where(u => u.IsActive)
-                .Select(u => new PessoaResponseDTO(u))
-                .ToListAsync();
+                .ToListAsync();                              
+            return pessoas
+                .Select(u => new PessoaResponseDTO(u))       
+                .ToList();
         }
 
         public async Task<PessoaResponseDTO> FindByCPF(string cpf)
@@ -27,7 +30,21 @@ namespace Agenda.Services
             if (string.IsNullOrEmpty(cpf))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
 
-            var pessoa = await db.Pessoas.FirstOrDefaultAsync(u => u.CPF == cpf && u.IsActive);
+            var pessoa = await db.Pessoas
+                .Include(p => p.Telefones)
+                .FirstOrDefaultAsync(u => u.CPF == cpf && u.IsActive);
+            if (pessoa == null)
+                throw new KeyNotFoundException("Pessoa não encontrada.");
+
+            return pessoa;
+        }
+
+        public async Task<Pessoa> FindByIdInternal(Guid id)
+        {
+            if (id == Guid.Empty)
+                throw new ArgumentException("O Campo de Id não pode estar vazio ou inválido");
+
+            var pessoa = await db.Pessoas.FirstOrDefaultAsync(u => u.Id == id && u.IsActive);
             if (pessoa == null)
                 throw new KeyNotFoundException("Pessoa não encontrada.");
 
