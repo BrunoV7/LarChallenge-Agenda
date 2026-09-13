@@ -15,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<PessoaService>();
 builder.Services.AddScoped<TelefoneService>();
 builder.Services.AddScoped<CpfValidator>();
+builder.Services.AddScoped<TelefoneValidator>();
 builder.Services.AddControllers().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());

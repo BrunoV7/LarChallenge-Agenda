@@ -1,6 +1,7 @@
 using Agenda.Data;
 using Agenda.DTO;
 using Agenda.Models;
+using Agenda.Validators;
 using DTO.requests;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,8 @@ namespace Agenda.Services
 {
     public class TelefoneService(
         AgendaContext db,
-        PessoaService pessoaService)
+        PessoaService pessoaService,
+        TelefoneValidator telefoneValidator)
     {
         public async Task<PagedResult<TelefoneResponse>> ListAllTelefones(int page, int size)
         {
@@ -25,7 +27,7 @@ namespace Agenda.Services
                 .Skip((page - 1) * size)
                 .Take(size)
                 .ToListAsync();
-                
+
             return new PagedResult<TelefoneResponse>
             {
                 Items = telefones.Select(p => new TelefoneResponse(p)).ToList(),
@@ -63,9 +65,6 @@ namespace Agenda.Services
 
         private async Task<bool> ExistsByNumero(string numero, Guid idPessoa, Guid? ignorarId = null)
         {
-            if (string.IsNullOrWhiteSpace(numero))
-                throw new ArgumentException("O Campo de Numero não pode ser nulo ou vazio");
-
             return await db.Telefones
                 .AnyAsync(t => t.Numero == numero
                             && t.IdPessoa == idPessoa
@@ -76,13 +75,15 @@ namespace Agenda.Services
         {
             var pessoa = await pessoaService.FindByIdInternal(novoTelefone.IdPessoa);
 
-            if (string.IsNullOrWhiteSpace(novoTelefone.Numero))
-                throw new ArgumentException("O Campo de Numero não pode ser nulo ou vazio");
+            if (!telefoneValidator.IsValid(novoTelefone.Numero))
+                throw new ArgumentException("Número de telefone inválido.");
 
-            if (await ExistsByNumero(novoTelefone.Numero, pessoa.Id))
+            var numeroNormalizado = telefoneValidator.Normalizar(novoTelefone.Numero);
+
+            if (await ExistsByNumero(numeroNormalizado, pessoa.Id))
                 throw new ArgumentException("Esta pessoa já possui um telefone com este número.");
 
-            Telefone telefone = new Telefone(novoTelefone.Tipo, novoTelefone.Numero, pessoa);
+            Telefone telefone = new Telefone(novoTelefone.Tipo, numeroNormalizado, pessoa);
             db.Telefones.Add(telefone);
             await db.SaveChangesAsync();
 
@@ -93,11 +94,19 @@ namespace Agenda.Services
         {
             var telefone = await FindByIdInternal(id);
 
-            if (!string.IsNullOrWhiteSpace(telefoneAtualizado.Numero) && telefoneAtualizado.Numero != telefone.Numero)
+            if (!string.IsNullOrWhiteSpace(telefoneAtualizado.Numero))
             {
-                if (await ExistsByNumero(telefoneAtualizado.Numero, telefone.IdPessoa, id))
-                    throw new ArgumentException("Esta pessoa já possui um telefone com este número.");
-                telefone.Numero = telefoneAtualizado.Numero;
+                if (!telefoneValidator.IsValid(telefoneAtualizado.Numero))
+                    throw new ArgumentException("Número de telefone inválido.");
+
+                var numeroNormalizado = telefoneValidator.Normalizar(telefoneAtualizado.Numero);
+
+                if (numeroNormalizado != telefone.Numero)
+                {
+                    if (await ExistsByNumero(numeroNormalizado, telefone.IdPessoa, id))
+                        throw new ArgumentException("Esta pessoa já possui um telefone com este número.");
+                    telefone.Numero = numeroNormalizado;
+                }
             }
 
             if (telefoneAtualizado.Tipo.HasValue)
