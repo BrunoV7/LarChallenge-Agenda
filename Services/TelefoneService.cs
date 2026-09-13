@@ -2,6 +2,7 @@ using Agenda.Data;
 using Agenda.DTO;
 using Agenda.Models;
 using DTO.requests;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services
@@ -10,15 +11,30 @@ namespace Agenda.Services
         AgendaContext db,
         PessoaService pessoaService)
     {
-        public async Task<List<TelefoneResponse>> ListAllTelefones()
+        public async Task<PagedResult<TelefoneResponse>> ListAllTelefones(int page, int size)
         {
-            var telefones = await db.Telefones
+            if (page < 1) page = 1;
+            if (size < 1) size = 10;
+            if (size > 100) size = 100;
+
+            var query = db.Telefones.Where(t => t.IsActive);
+            var totalItems = await query.CountAsync();
+
+            var telefones = await query
                 .Include(t => t.Pessoa)
-                .Where(t => t.IsActive && t.Pessoa.IsActive)
+                .OrderBy(t => t.Id)
+                .Skip((page - 1) * size)
+                .Take(size)
                 .ToListAsync();
-            return telefones
-                .Select(t => new TelefoneResponse(t))
-                .ToList();
+                
+            return new PagedResult<TelefoneResponse>
+            {
+                Items = telefones.Select(p => new TelefoneResponse(p)).ToList(),
+                Page = page,
+                PageSize = size,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)size)
+            };
         }
 
         public async Task<TelefoneResponse> FindById(Guid id)

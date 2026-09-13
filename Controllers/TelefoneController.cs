@@ -11,9 +11,9 @@ namespace Agenda.Controllers
     public class TelefonesController(TelefoneService service) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TelefoneResponse>>> BuscarTodos()
+        public async Task<ActionResult<PagedResult<TelefoneResponse>>> BuscarTodos([FromQuery] int page = 1, [FromQuery] int size = 10)
         {
-            return Ok(await service.ListAllTelefones());
+            return Ok(await service.ListAllTelefones(page, size));
         }
 
         [HttpGet("{id}")]

@@ -8,15 +8,30 @@ namespace Agenda.Services
 {
     public class PessoaService(AgendaContext db)
     {
-        public async Task<List<PessoaResponseDTO>> ListAllPessoas()
+        public async Task<PagedResult<PessoaResponseDTO>> ListAllPessoas(int page, int size)
         {
-            var pessoas = await db.Pessoas
-                .Include(p => p.Telefones)
-                .Where(u => u.IsActive)
-                .ToListAsync();                              
-            return pessoas
-                .Select(u => new PessoaResponseDTO(u))       
-                .ToList();
+            if (page < 1) page = 1;
+            if (size < 1) size = 10;
+            if (size > 100) size = 100;
+
+            var query = db.Pessoas.Where(p => p.IsActive);
+            var totalItems = await query.CountAsync();       
+
+            var pessoas = await query
+                .Include(p => p.Telefones)                     
+                .OrderBy(p => p.Id)
+                .Skip((page - 1) * size)
+                .Take(size)
+                .ToListAsync();
+
+            return new PagedResult<PessoaResponseDTO>
+            {
+                Items = pessoas.Select(p => new PessoaResponseDTO(p)).ToList(),
+                Page = page,
+                PageSize = size,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)size)
+            };
         }
 
         public async Task<PessoaResponseDTO> FindByCPF(string cpf)

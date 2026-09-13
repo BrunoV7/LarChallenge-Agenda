@@ -2,6 +2,7 @@ using Agenda.DTO;
 using DTO.requests;
 using Agenda.Services;
 using Microsoft.AspNetCore.Mvc;
+using Agenda.Models;
 
 namespace Agenda.Controllers
 {
@@ -10,9 +11,9 @@ namespace Agenda.Controllers
     public class PessoaController(PessoaService service) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PessoaResponseDTO>>> BuscarTodos()
+        public async Task<ActionResult<PagedResult<PessoaResponseDTO>>> BuscarTodos([FromQuery] int page = 1, [FromQuery] int size = 10)
         {
-            return Ok(await service.ListAllPessoas());
+            return Ok(await service.ListAllPessoas(page, size));
         }
 
         [HttpGet("{cpf}")]
