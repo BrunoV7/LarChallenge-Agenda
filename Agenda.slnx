@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Agenda.csproj" />
+  <Project Path="Agenda.Tests/Agenda.Tests.csproj" />
+</Solution>

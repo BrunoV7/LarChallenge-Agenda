@@ -15,5 +15,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.17.3" />
   </ItemGroup>
+  <ItemGroup>
+  <Compile Remove="Agenda.Tests/**/*.cs" />
+  <Content Remove="Agenda.Tests/**/*" />
+</ItemGroup>
 
 </Project>

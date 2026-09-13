@@ -1,12 +1,13 @@
 using Agenda.Data;
 using Agenda.DTO;
 using Agenda.Models;
+using Agenda.Validators;
 using DTO.requests;
 using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services
 {
-    public class PessoaService(AgendaContext db)
+    public class PessoaService(AgendaContext db, CpfValidator cpfValidator)
     {
         public async Task<PagedResult<PessoaResponseDTO>> ListAllPessoas(int page, int size)
         {
@@ -15,10 +16,10 @@ namespace Agenda.Services
             if (size > 100) size = 100;
 
             var query = db.Pessoas.Where(p => p.IsActive);
-            var totalItems = await query.CountAsync();       
+            var totalItems = await query.CountAsync();
 
             var pessoas = await query
-                .Include(p => p.Telefones)                     
+                .Include(p => p.Telefones)
                 .OrderBy(p => p.Id)
                 .Skip((page - 1) * size)
                 .Take(size)
@@ -45,9 +46,11 @@ namespace Agenda.Services
             if (string.IsNullOrWhiteSpace(cpf))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
 
+            var cpfNormalizado = cpfValidator.Normalizar(cpf);
+
             var pessoa = await db.Pessoas
                 .Include(p => p.Telefones)
-                .FirstOrDefaultAsync(u => u.CPF == cpf && u.IsActive);
+                .FirstOrDefaultAsync(u => u.CPF == cpfNormalizado && u.IsActive);
             if (pessoa == null)
                 throw new KeyNotFoundException("Pessoa não encontrada.");
 
@@ -66,25 +69,28 @@ namespace Agenda.Services
             return pessoa;
         }
 
-        private async Task<bool> ExistsWithCPF(string cpf, Guid? ignorarId = null)
+        private async Task<bool> ExistsWithCPF(string cpfNormalizado, Guid? ignorarId = null)
         {
-            if (string.IsNullOrWhiteSpace(cpf))
-                throw new ArgumentException("CPF não pode ser nulo ou vazio.");
-
             return await db.Pessoas
-                .AnyAsync(u => u.CPF == cpf && (ignorarId == null || u.Id != ignorarId));
+                .AnyAsync(u => u.CPF == cpfNormalizado && (ignorarId == null || u.Id != ignorarId));
         }
 
         public async Task<PessoaResponseDTO> CreatePessoa(PessoaRequestDTO novaPessoa)
         {
-            if (await ExistsWithCPF(novaPessoa.CPF))
-                throw new ArgumentException("Já existe um usuário cadastrado com este CPF.");
             if (string.IsNullOrWhiteSpace(novaPessoa.Name))
                 throw new ArgumentException("Nome não pode ser nulo ou vazio.");
             if (novaPessoa.BirthDate == DateOnly.MinValue)
                 throw new ArgumentException("Data de nascimento não pode ser nula.");
 
-            Pessoa pessoa = new Pessoa(novaPessoa.Name, novaPessoa.CPF, novaPessoa.BirthDate);
+            if (!cpfValidator.IsValid(novaPessoa.CPF))
+                throw new ArgumentException("CPF inválido.");
+
+            var cpfNormalizado = cpfValidator.Normalizar(novaPessoa.CPF);
+
+            if (await ExistsWithCPF(cpfNormalizado))
+                throw new ArgumentException("Já existe um usuário cadastrado com este CPF.");
+
+            Pessoa pessoa = new Pessoa(novaPessoa.Name, cpfNormalizado, novaPessoa.BirthDate);
 
             db.Pessoas.Add(pessoa);
             await db.SaveChangesAsync();
@@ -101,9 +107,15 @@ namespace Agenda.Services
 
             if (!string.IsNullOrWhiteSpace(novaPessoa.CPF))
             {
-                if (await ExistsWithCPF(novaPessoa.CPF, existente.Id))
+                if (!cpfValidator.IsValid(novaPessoa.CPF))
+                    throw new ArgumentException("CPF inválido.");
+
+                var cpfNormalizado = cpfValidator.Normalizar(novaPessoa.CPF);
+
+                if (await ExistsWithCPF(cpfNormalizado, existente.Id))
                     throw new ArgumentException("Já existe um usuário cadastrado com este CPF.");
-                existente.CPF = novaPessoa.CPF;
+
+                existente.CPF = cpfNormalizado;
             }
 
             if (novaPessoa.BirthDate != DateOnly.MinValue)

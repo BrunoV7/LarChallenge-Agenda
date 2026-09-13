@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Agenda.Data;
 using Agenda.Middleware;
 using Agenda.Services;
+using Agenda.Validators;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -13,6 +14,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddScoped<PessoaService>();
 builder.Services.AddScoped<TelefoneService>();
+builder.Services.AddScoped<CpfValidator>();
 builder.Services.AddControllers().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
