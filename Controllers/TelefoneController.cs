@@ -1,13 +1,15 @@
-using Agenda.DTO;
+using Agenda.DTOs;
 using Agenda.Models;
 using Agenda.Services;
 using DTO.requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Agenda.Controllers
 {
     [ApiController]
     [Route("api/telefones")]
+    [Authorize]
     public class TelefoneController(TelefoneService service) : ControllerBase
     {
         [HttpGet]

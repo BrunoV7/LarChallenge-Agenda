@@ -2,6 +2,7 @@
 
 using System.Text.Json.Serialization;
 using Agenda.Data;
+using Agenda.Extensions;
 using Agenda.Middleware;
 using Agenda.Services;
 using Agenda.Validators;
@@ -9,17 +10,22 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApiWithJwt();
 
-builder.Services.AddControllers();
 builder.Services.AddScoped<PessoaService>();
 builder.Services.AddScoped<TelefoneService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<CpfValidator>();
 builder.Services.AddScoped<TelefoneValidator>();
 builder.Services.AddControllers().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+
+DotNetEnv.Env.Load();
+builder.Configuration.AddEnvironmentVariables();
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(configure =>
@@ -44,6 +50,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();

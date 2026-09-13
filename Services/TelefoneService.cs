@@ -1,5 +1,5 @@
 using Agenda.Data;
-using Agenda.DTO;
+using Agenda.DTOs;
 using Agenda.Models;
 using Agenda.Validators;
 using DTO.requests;

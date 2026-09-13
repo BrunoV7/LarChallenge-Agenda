@@ -13,6 +13,7 @@ namespace Agenda.Data
 
         public DbSet<Pessoa> Pessoas { get; set; }
         public DbSet<Telefone> Telefones { get; set; }
+        public DbSet<User> User { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,9 @@ namespace Agenda.Data
 
             modelBuilder.Entity<Telefone>()
                 .HasIndex(t => new { t.Numero, t.IdPessoa })
+                .IsUnique();
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
                 .IsUnique();
         }
 

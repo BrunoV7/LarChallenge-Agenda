@@ -1,6 +1,6 @@
 using Agenda.Models;
 
-namespace Agenda.DTO
+namespace Agenda.DTOs
 {
     public class TelefoneDto
     {

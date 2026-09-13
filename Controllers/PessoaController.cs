@@ -1,13 +1,15 @@
-using Agenda.DTO;
+using Agenda.DTOs;
 using DTO.requests;
 using Agenda.Services;
 using Microsoft.AspNetCore.Mvc;
 using Agenda.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Agenda.Controllers
 {
     [ApiController]
     [Route("api/pessoas")]
+    [Authorize]
     public class PessoaController(PessoaService service) : ControllerBase
     {
         [HttpGet]
