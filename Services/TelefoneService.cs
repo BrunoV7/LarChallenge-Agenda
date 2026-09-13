@@ -2,7 +2,6 @@ using Agenda.Data;
 using Agenda.DTO;
 using Agenda.Models;
 using DTO.requests;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services
@@ -64,7 +63,7 @@ namespace Agenda.Services
 
         private async Task<bool> ExistsByNumero(string numero, Guid idPessoa, Guid? ignorarId = null)
         {
-            if (string.IsNullOrEmpty(numero))
+            if (string.IsNullOrWhiteSpace(numero))
                 throw new ArgumentException("O Campo de Numero não pode ser nulo ou vazio");
 
             return await db.Telefones
@@ -77,7 +76,7 @@ namespace Agenda.Services
         {
             var pessoa = await pessoaService.FindByIdInternal(novoTelefone.IdPessoa);
 
-            if (string.IsNullOrEmpty(novoTelefone.Numero))
+            if (string.IsNullOrWhiteSpace(novoTelefone.Numero))
                 throw new ArgumentException("O Campo de Numero não pode ser nulo ou vazio");
 
             if (await ExistsByNumero(novoTelefone.Numero, pessoa.Id))
@@ -94,7 +93,7 @@ namespace Agenda.Services
         {
             var telefone = await FindByIdInternal(id);
 
-            if (!string.IsNullOrEmpty(telefoneAtualizado.Numero) && telefoneAtualizado.Numero != telefone.Numero)
+            if (!string.IsNullOrWhiteSpace(telefoneAtualizado.Numero) && telefoneAtualizado.Numero != telefone.Numero)
             {
                 if (await ExistsByNumero(telefoneAtualizado.Numero, telefone.IdPessoa, id))
                     throw new ArgumentException("Esta pessoa já possui um telefone com este número.");

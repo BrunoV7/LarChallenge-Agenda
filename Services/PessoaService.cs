@@ -42,7 +42,7 @@ namespace Agenda.Services
 
         private async Task<Pessoa> FindByCPFInternal(string cpf)
         {
-            if (string.IsNullOrEmpty(cpf))
+            if (string.IsNullOrWhiteSpace(cpf))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
 
             var pessoa = await db.Pessoas
@@ -68,7 +68,7 @@ namespace Agenda.Services
 
         private async Task<bool> ExistsWithCPF(string cpf, Guid? ignorarId = null)
         {
-            if (string.IsNullOrEmpty(cpf))
+            if (string.IsNullOrWhiteSpace(cpf))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
 
             return await db.Pessoas
@@ -79,7 +79,7 @@ namespace Agenda.Services
         {
             if (await ExistsWithCPF(novaPessoa.CPF))
                 throw new ArgumentException("Já existe um usuário cadastrado com este CPF.");
-            if (string.IsNullOrEmpty(novaPessoa.Name))
+            if (string.IsNullOrWhiteSpace(novaPessoa.Name))
                 throw new ArgumentException("Nome não pode ser nulo ou vazio.");
             if (novaPessoa.BirthDate == DateOnly.MinValue)
                 throw new ArgumentException("Data de nascimento não pode ser nula.");
@@ -96,10 +96,10 @@ namespace Agenda.Services
         {
             Pessoa existente = await FindByCPFInternal(cpf);
 
-            if (!string.IsNullOrEmpty(novaPessoa.Name))
+            if (!string.IsNullOrWhiteSpace(novaPessoa.Name))
                 existente.Name = novaPessoa.Name;
 
-            if (!string.IsNullOrEmpty(novaPessoa.CPF))
+            if (!string.IsNullOrWhiteSpace(novaPessoa.CPF))
             {
                 if (await ExistsWithCPF(novaPessoa.CPF, existente.Id))
                     throw new ArgumentException("Já existe um usuário cadastrado com este CPF.");

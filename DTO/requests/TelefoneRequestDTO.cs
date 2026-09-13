@@ -5,9 +5,8 @@ namespace DTO.requests
 {
     public class TelefoneCreationRequest
     {   
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public TipoTelefone Tipo { get; set; }
-        public string Numero { get; set; } = null!;
+        public string Numero { get; set; } = "";
         public Guid IdPessoa { get; set; }
         
     }
@@ -15,6 +14,6 @@ namespace DTO.requests
     public class TelefoneUpdateRequest
 {
     public TipoTelefone? Tipo { get; set; } 
-    public string Numero { get; set; } = null!;
+    public string Numero { get; set; } = "";
 }
 }
