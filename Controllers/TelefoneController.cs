@@ -11,10 +11,18 @@ namespace Agenda.Controllers
     public class TelefoneController(TelefoneService service) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<PagedResult<TelefoneResponse>>> BuscarTodos([FromQuery] int page = 1, [FromQuery] int size = 10)
+        public async Task<ActionResult<PagedResult<TelefoneResponse>>> BuscarTodos([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? cpf = null, [FromQuery] string? telefone = null)
         {
-            return Ok(await service.ListAllTelefones(page, size));
+            if (!string.IsNullOrWhiteSpace(cpf))
+            {
+                return Ok(await service.FindAllTelefonesByCpf(cpf, page, size));
+            }
+            else
+            {
+                return Ok(await service.ListAllTelefones(page, size));
+            }
         }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TelefoneResponse>> BuscarPorId(Guid id)
@@ -22,11 +30,18 @@ namespace Agenda.Controllers
             return Ok(await service.FindById(id));
         }
 
+        [HttpGet("buscar")]
+        public async Task<ActionResult<List<TelefoneResponse>>> BuscarPorTelefone([FromQuery] string telefone)
+        {
+            return Ok(await service.FindByNumero(telefone));
+        }
+
+
         [HttpPost]
         public async Task<ActionResult<TelefoneResponse>> Criar([FromBody] TelefoneCreationRequest novo)
         {
             var criado = await service.CreateTelefone(novo);
-            return CreatedAtAction(nameof(BuscarPorId), new { id = criado.Id}, criado);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = criado.Id }, criado);
         }
 
         [HttpPut("{id}")]
@@ -34,7 +49,7 @@ namespace Agenda.Controllers
         {
             return Ok(await service.UpdateTelefone(id, atualizado));
         }
-        
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Deletar(Guid id)
         {

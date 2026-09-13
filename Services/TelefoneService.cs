@@ -10,7 +10,8 @@ namespace Agenda.Services
     public class TelefoneService(
         AgendaContext db,
         PessoaService pessoaService,
-        TelefoneValidator telefoneValidator)
+        TelefoneValidator telefoneValidator,
+        CpfValidator cpfValidator)
     {
         public async Task<PagedResult<TelefoneResponse>> ListAllTelefones(int page, int size)
         {
@@ -30,7 +31,7 @@ namespace Agenda.Services
 
             return new PagedResult<TelefoneResponse>
             {
-                Items = telefones.Select(p => new TelefoneResponse(p)).ToList(),
+                Items = telefones.Select(t => new TelefoneResponse(t)).ToList(),
                 Page = page,
                 PageSize = size,
                 TotalItems = totalItems,
@@ -42,6 +43,47 @@ namespace Agenda.Services
         {
             var telefone = await FindByIdInternal(id);
             return new TelefoneResponse(telefone);
+        }
+
+        public async Task<PagedResult<TelefoneResponse>> FindAllTelefonesByCpf(string cpf, int page, int size)
+        {
+            if (!cpfValidator.IsValid(cpf))
+                throw new ArgumentException("CPF inválido.");
+
+            Pessoa pessoa = await pessoaService.FindByCPFInternal(cpf);
+
+            var query = db.Telefones.Where(t => t.IsActive && t.IdPessoa == pessoa.Id);
+            var totalItems = await query.CountAsync();
+            var telefones = await query
+                .Include(t => t.Pessoa)
+                .OrderBy(t => t.Id)
+                .Skip((page - 1) * size)
+                .Take(size)
+                .ToListAsync();
+            return new PagedResult<TelefoneResponse>
+            {
+                Items = telefones.Select(t => new TelefoneResponse(t)).ToList(),
+                Page = page,
+                PageSize = size,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)size)
+            };
+        }
+
+        public async Task<List<TelefoneResponse>> FindByNumero(string numero)
+        {
+            if (string.IsNullOrWhiteSpace(numero))
+                throw new ArgumentException("Número de telefone não pode ser nulo ou vazio.");
+
+            var numeroNormalizado = telefoneValidator.Normalizar(numero);
+
+            var telefones = await db.Telefones
+                .Include(t => t.Pessoa)
+                .Where(t => t.Numero == numeroNormalizado && t.IsActive && t.Pessoa.IsActive)
+                .OrderBy(t => t.Id)
+                .ToListAsync();
+
+            return telefones.Select(t => new TelefoneResponse(t)).ToList();
         }
 
         public async Task<Telefone> FindByIdInternal(Guid id)

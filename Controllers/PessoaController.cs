@@ -35,6 +35,12 @@ namespace Agenda.Controllers
             return Ok(await service.UpdatePessoa(cpf, pessoa));
         }
 
+        [HttpPut("reativar/{cpf}")]
+        public async Task<ActionResult<PessoaResponseDTO>> Reativar(string cpf)
+        {
+            return Ok(await service.ReativarPessoa(cpf));
+        }
+
         [HttpDelete("{cpf}")]
         public async Task<IActionResult> Deletar(string cpf)
         {

@@ -20,6 +20,11 @@ namespace Agenda.Data
                 .Property(t => t.Tipo)
                 .HasConversion<string>();
 
+            modelBuilder.Entity<Telefone>()
+                .HasOne(t => t.Pessoa)
+                .WithMany(p => p.Telefones)
+                .HasForeignKey(t => t.IdPessoa);
+
             modelBuilder.Entity<Pessoa>()
                 .HasIndex(p => p.CPF)
                 .IsUnique();

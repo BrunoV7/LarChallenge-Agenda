@@ -41,7 +41,7 @@ namespace Agenda.Services
             return new PessoaResponseDTO(pessoa);
         }
 
-        private async Task<Pessoa> FindByCPFInternal(string cpf)
+        public async Task<Pessoa> FindByCPFInternal(string cpf)
         {
             if (string.IsNullOrWhiteSpace(cpf))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
@@ -123,6 +123,28 @@ namespace Agenda.Services
 
             await db.SaveChangesAsync();
             return new PessoaResponseDTO(existente);
+        }
+
+        public async Task<PessoaResponseDTO> ReativarPessoa(string cpf)
+        {
+            if (string.IsNullOrWhiteSpace(cpf))
+                throw new ArgumentException("CPF não pode ser nulo ou vazio.");
+
+            var cpfNormalizado = cpfValidator.Normalizar(cpf);
+
+            var pessoa = await db.Pessoas
+                .FirstOrDefaultAsync(u => u.CPF == cpfNormalizado); 
+
+            if (pessoa == null)
+                throw new KeyNotFoundException("Pessoa não encontrada.");
+
+            if (pessoa.IsActive)
+                throw new ArgumentException("Esta pessoa já está ativa.");
+
+            pessoa.IsActive = true;
+            await db.SaveChangesAsync();
+
+            return new PessoaResponseDTO(pessoa);
         }
 
         public async Task<bool> DeletePessoa(string cpf)
