@@ -159,7 +159,7 @@ namespace Agenda.Services
                 telefone.IsActive = true;
 
             await db.SaveChangesAsync();
-            logger.LogInformation("Pessoa criada: {PessoaId}", pessoa.Id);
+            logger.LogInformation("Pessoa reativada: {PessoaId}", pessoa.Id);
             return new PessoaResponseDTO(pessoa);
         }
         public async Task<bool> DeletePessoa(string cpf)

@@ -22,7 +22,7 @@ public class AuthService(AgendaContext context, TokenService tokenService, ILogg
 
         context.User.Add(user);
         await context.SaveChangesAsync();
-        logger.LogInformation("Novo usuário registrado: {Email}", user.Id);
+        logger.LogInformation("Novo usuário registrado: {UserId}", user.Id);
         return tokenService.GerarToken(user);
     }
 
