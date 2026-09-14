@@ -23,7 +23,7 @@ namespace Agenda.DTOs
         : base(telefone)
         {
             IdPessoa = telefone.Pessoa.Id;
-            Nome = telefone.Pessoa.Name;
+            Nome = telefone.Pessoa.Nome;
         }
     }
 }

@@ -3,27 +3,27 @@ namespace Agenda.Models
     public class Pessoa
     {
         public Guid Id { get; set; }
-        public string Name { get; set; } = "";
+        public string Nome { get; set; } = "";
         public string CPF { get; set; } = "";
-        public DateOnly BirthDate { get; set; }
+        public DateOnly DataNascimento { get; set; }
         public bool IsActive { get; set; } = true;
 
         public ICollection<Telefone> Telefones { get; set; } = new List<Telefone>();
 
-        public Pessoa(string name, string cpf, DateOnly birthDate)
+        public Pessoa(string nome, string cpf, DateOnly dataNascimento)
         {
             this.Id = Guid.CreateVersion7();
-            this.Name = name;
+            this.Nome = nome;
             this.CPF = cpf;
-            this.BirthDate = birthDate;
+            this.DataNascimento = dataNascimento;
         }
 
-        public Pessoa(string name, string cpf, DateOnly birthDate, ICollection<Telefone> telefones)
+        public Pessoa(string nome, string cpf, DateOnly dataNascimento, ICollection<Telefone> telefones)
         {
             this.Id = Guid.CreateVersion7();
-            this.Name = name;
+            this.Nome = nome;
             this.CPF = cpf;
-            this.BirthDate = birthDate;
+            this.DataNascimento = dataNascimento;
             this.Telefones = telefones;
         }
 

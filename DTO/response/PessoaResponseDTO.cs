@@ -5,17 +5,17 @@ namespace Agenda.DTOs
     public class PessoaResponseDTO
     {
         public Guid Id { get; set; }
-        public string Name { get; set; } = "";
+        public string Nome { get; set; } = "";
         public string CPF { get; set; } = "";
-        public DateOnly BirthDate { get; set; }
+        public DateOnly DataNascimento { get; set; }
         public List<TelefoneDto> Telefones { get; set; } = new List<TelefoneDto>();
 
         public PessoaResponseDTO(Pessoa pessoa)
         {
             this.Id = pessoa.Id;
-            this.Name = pessoa.Name;
+            this.Nome = pessoa.Nome;
             this.CPF = pessoa.CPF;
-            this.BirthDate = pessoa.BirthDate;
+            this.DataNascimento = pessoa.DataNascimento;
             if (pessoa.Telefones != null)
             {
                 this.Telefones = pessoa.Telefones

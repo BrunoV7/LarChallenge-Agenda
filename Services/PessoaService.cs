@@ -19,13 +19,13 @@ namespace Agenda.Services
             var query = db.Pessoas.Where(p => p.IsActive == ativo);
 
             if (!string.IsNullOrWhiteSpace(nome))
-                query = query.Where(p => p.Name.ToLower().Contains(nome.ToLower()));
+                query = query.Where(p => p.Nome.ToLower().Contains(nome.ToLower()));
 
             var totalItems = await query.CountAsync();
 
             var ordenada = desc
-                ? query.OrderByDescending(p => p.Name)
-                : query.OrderBy(p => p.Name);
+                ? query.OrderByDescending(p => p.Nome)
+                : query.OrderBy(p => p.Nome);
 
             var pessoas = await ordenada
                 .Include(p => p.Telefones)
@@ -85,13 +85,13 @@ namespace Agenda.Services
 
         public async Task<PessoaResponseDTO> CreatePessoa(PessoaRequestDTO novaPessoa)
         {
-            if (string.IsNullOrWhiteSpace(novaPessoa.Name))
+            if (string.IsNullOrWhiteSpace(novaPessoa.Nome))
                 throw new ArgumentException("Nome não pode ser nulo ou vazio.");
             if (string.IsNullOrWhiteSpace(novaPessoa.CPF))
                 throw new ArgumentException("CPF não pode ser nulo ou vazio.");
-            if (novaPessoa.BirthDate == DateOnly.MinValue)
+            if (novaPessoa.DataNascimento == DateOnly.MinValue)
                 throw new ArgumentException("Data de nascimento não pode ser nula.");
-            if (novaPessoa.BirthDate > DateOnly.FromDateTime(DateTime.Today))
+            if (novaPessoa.DataNascimento > DateOnly.FromDateTime(DateTime.Today))
                 throw new ArgumentException("Data de nascimento não pode ser no futuro.");
 
             if (!cpfValidator.IsValid(novaPessoa.CPF))
@@ -102,7 +102,7 @@ namespace Agenda.Services
             if (await ExistsWithCPF(cpfNormalizado))
                 throw new ConflictException("Já existe um usuário cadastrado com este CPF.");
 
-            Pessoa pessoa = new Pessoa(novaPessoa.Name, cpfNormalizado, novaPessoa.BirthDate);
+            Pessoa pessoa = new Pessoa(novaPessoa.Nome, cpfNormalizado, novaPessoa.DataNascimento);
 
             db.Pessoas.Add(pessoa);
             await db.SaveChangesAsync();
@@ -114,14 +114,14 @@ namespace Agenda.Services
         {
             Pessoa existente = await FindByCPFInternal(cpf);
 
-            if (!string.IsNullOrWhiteSpace(novaPessoa.Name))
-                existente.Name = novaPessoa.Name;
+            if (!string.IsNullOrWhiteSpace(novaPessoa.Nome))
+                existente.Nome = novaPessoa.Nome;
 
-            if (novaPessoa.BirthDate != DateOnly.MinValue)
+            if (novaPessoa.DataNascimento != DateOnly.MinValue)
             {
-                if (novaPessoa.BirthDate > DateOnly.FromDateTime(DateTime.Today))
+                if (novaPessoa.DataNascimento > DateOnly.FromDateTime(DateTime.Today))
                     throw new ArgumentException("Data de nascimento não pode ser no futuro.");
-                existente.BirthDate = novaPessoa.BirthDate;
+                existente.DataNascimento = novaPessoa.DataNascimento;
             }
 
             await db.SaveChangesAsync();
