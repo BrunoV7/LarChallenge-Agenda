@@ -112,19 +112,6 @@ namespace Agenda.Services
             if (!string.IsNullOrWhiteSpace(novaPessoa.Name))
                 existente.Name = novaPessoa.Name;
 
-            if (!string.IsNullOrWhiteSpace(novaPessoa.CPF))
-            {
-                if (!cpfValidator.IsValid(novaPessoa.CPF))
-                    throw new ArgumentException("CPF inválido.");
-
-                var cpfNormalizado = cpfValidator.Normalizar(novaPessoa.CPF);
-
-                if (await ExistsWithCPF(cpfNormalizado, existente.Id))
-                    throw new ArgumentException("Já existe um usuário cadastrado com este CPF.");
-
-                existente.CPF = cpfNormalizado;
-            }
-
             if (novaPessoa.BirthDate != DateOnly.MinValue)
                 existente.BirthDate = novaPessoa.BirthDate;
 

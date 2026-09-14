@@ -3,6 +3,7 @@ using Agenda.Converters;
 using Agenda.Data;
 using Agenda.Extensions;
 using Agenda.Middleware;
+using Agenda.Models;
 using Agenda.Services;
 using Agenda.Validators;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,23 @@ builder.Services.AddDbContext<AgendaContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("AgendaDb")));
 
 var app = builder.Build();
+
+// Faz o seed do usuário admin caso não exista
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AgendaContext>();
+    if (!await db.User.AnyAsync(u => u.Role == UserRole.Admin && u.IsActive))
+    {
+        db.User.Add(new User
+        {
+            Nome = "Administrador",
+            Email = "admin@agenda.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+            Role = UserRole.Admin
+        });
+        await db.SaveChangesAsync();
+    }
+}
 
 app.UseExceptionHandler();
 
