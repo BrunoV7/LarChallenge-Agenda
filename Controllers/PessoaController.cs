@@ -10,7 +10,7 @@ namespace Agenda.Controllers
     [ApiController]
     [Route("api/pessoas")]
     [Authorize]
-    public class PessoaController(PessoaService service) : ControllerBase
+    public class PessoaController(IPessoaService service) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<PagedResult<PessoaResponseDTO>>> BuscarTodos(

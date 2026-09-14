@@ -6,7 +6,7 @@ namespace Agenda.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(AuthService service) : ControllerBase
+    public class AuthController(IAuthService service) : ControllerBase
     {
 
         [HttpPost("register")]

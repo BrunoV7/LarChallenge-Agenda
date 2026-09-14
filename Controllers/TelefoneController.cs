@@ -10,7 +10,7 @@ namespace Agenda.Controllers
     [ApiController]
     [Route("api/telefones")]
     [Authorize]
-    public class TelefoneController(TelefoneService service) : ControllerBase
+    public class TelefoneController(ITelefoneService service) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<PagedResult<TelefoneResponse>>> BuscarTodos([FromQuery] int page = 1,[FromQuery] int size = 10,[FromQuery] string? cpf = null,[FromQuery] TipoTelefone? tipo = null,[FromQuery] bool ativo = true,[FromQuery] bool desc = false)

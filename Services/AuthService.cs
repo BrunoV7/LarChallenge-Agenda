@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services;
 
-public class AuthService(AgendaContext context, TokenService tokenService, ILogger<AuthService> logger)
+public class AuthService(AgendaContext context, ITokenService tokenService, ILogger<AuthService> logger) : IAuthService
 {
     public async Task<TokenResponse?> Register(UserRegisterRequest request)
     {

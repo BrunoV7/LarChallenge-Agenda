@@ -13,11 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApiWithJwt();
 
-builder.Services.AddScoped<PessoaService>();
-builder.Services.AddScoped<TelefoneService>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IPessoaService, PessoaService>();
+builder.Services.AddScoped<ITelefoneService, TelefoneService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<CpfValidator>();
 builder.Services.AddScoped<TelefoneValidator>();
 
@@ -56,13 +56,23 @@ using (var scope = app.Services.CreateScope())
 
     if (!await db.User.AnyAsync(u => u.Role == UserRole.Admin && u.IsActive))
     {
-        db.User.Add(new User
+        var adminPadrao = await db.User.FirstOrDefaultAsync(u => u.Email == "admin@agenda.com");
+        if (adminPadrao != null)
         {
-            Nome = "Administrador",
-            Email = "admin@agenda.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
-            Role = UserRole.Admin
-        });
+            adminPadrao.IsActive = true;
+            adminPadrao.Role = UserRole.Admin;
+            adminPadrao.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123");
+        }
+        else
+        {
+            db.User.Add(new User
+            {
+                Nome = "Administrador",
+                Email = "admin@agenda.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+                Role = UserRole.Admin
+            });
+        }
         await db.SaveChangesAsync();
     }
 }

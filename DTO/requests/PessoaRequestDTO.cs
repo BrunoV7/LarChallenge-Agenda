@@ -1,6 +1,6 @@
 using Agenda.Models;
 
-namespace DTO.requests
+namespace Agenda.DTOs
 {
     // DTO que é usada para cadastrar pessoas
     public class PessoaRequestDTO

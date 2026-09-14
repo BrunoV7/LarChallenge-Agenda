@@ -8,7 +8,7 @@ namespace Agenda.Controllers
     [ApiController]
     [Route("api/users")]
     [Authorize(Roles = "Admin")]  
-    public class UsersController(UserService service) : ControllerBase
+    public class UsersController(IUserService service) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<List<UserResponse>>> ListarTodos()

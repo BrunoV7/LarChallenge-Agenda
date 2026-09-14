@@ -9,10 +9,10 @@ namespace Agenda.Services
 {
     public class TelefoneService(
         AgendaContext db,
-        PessoaService pessoaService,
+        IPessoaService pessoaService,
         TelefoneValidator telefoneValidator,
         CpfValidator cpfValidator,
-        ILogger<TelefoneService> logger)
+        ILogger<TelefoneService> logger) : ITelefoneService
     {
         public async Task<PagedResult<TelefoneResponse>> ListAllTelefones(int page, int size, TipoTelefone? tipo = null, bool ativo = true, bool desc = false)
         {

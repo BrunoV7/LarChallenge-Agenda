@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services
 {
-    public class UserService(AgendaContext context, ILogger<UserService> logger)
+    public class UserService(AgendaContext context, ILogger<UserService> logger) : IUserService
     {
         public async Task<List<UserResponse>> ListarUsuarios()
         {
