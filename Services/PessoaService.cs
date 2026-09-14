@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services
 {
-    public class PessoaService(AgendaContext db, CpfValidator cpfValidator)
+    public class PessoaService(AgendaContext db, CpfValidator cpfValidator, ILogger<PessoaService> logger)
     {
         public async Task<PagedResult<PessoaResponseDTO>> ListAllPessoas(int page, int size, string? nome = null, bool ativo = true, bool desc = false)
         {
@@ -101,7 +101,7 @@ namespace Agenda.Services
 
             db.Pessoas.Add(pessoa);
             await db.SaveChangesAsync();
-
+            logger.LogInformation("Pessoa criada: {PessoaId}", pessoa.Id);
             return new PessoaResponseDTO(pessoa);
         }
 
@@ -129,6 +129,7 @@ namespace Agenda.Services
                 existente.BirthDate = novaPessoa.BirthDate;
 
             await db.SaveChangesAsync();
+            logger.LogInformation("Pessoa atualizada: {PessoaId}", existente.Id);
             return new PessoaResponseDTO(existente);
         }
 
@@ -158,7 +159,7 @@ namespace Agenda.Services
                 telefone.IsActive = true;
 
             await db.SaveChangesAsync();
-
+            logger.LogInformation("Pessoa criada: {PessoaId}", pessoa.Id);
             return new PessoaResponseDTO(pessoa);
         }
         public async Task<bool> DeletePessoa(string cpf)
@@ -174,6 +175,7 @@ namespace Agenda.Services
                 telefone.IsActive = false;
 
             await db.SaveChangesAsync();
+            logger.LogInformation("Pessoa desativada: {PessoaId}", existente.Id);
             return true;
         }
     }

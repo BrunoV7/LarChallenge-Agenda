@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services;
 
-public class AuthService(AgendaContext context, TokenService tokenService)
+public class AuthService(AgendaContext context, TokenService tokenService, ILogger<AuthService> logger)
 {
     public async Task<TokenResponse?> Register(UserRegisterRequest request)
     {
         if (await context.User.AnyAsync(u => u.Email == request.Email))
-            return null; // email já existe
+            return null; 
 
         var user = new User
         {
@@ -22,7 +22,7 @@ public class AuthService(AgendaContext context, TokenService tokenService)
 
         context.User.Add(user);
         await context.SaveChangesAsync();
-
+        logger.LogInformation("Novo usuário registrado: {Email}", user.Id);
         return tokenService.GerarToken(user);
     }
 
@@ -33,8 +33,11 @@ public class AuthService(AgendaContext context, TokenService tokenService)
 
         if (user is null ||
             !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            logger.LogWarning("Tentativa de login falha: {Email}", request.Email);
             return null; 
-
+        }
+        logger.LogInformation("Login bem-sucedido: {Email}", request.Email);
         return tokenService.GerarToken(user);
     }
 }

@@ -11,9 +11,10 @@ namespace Agenda.Services
         AgendaContext db,
         PessoaService pessoaService,
         TelefoneValidator telefoneValidator,
-        CpfValidator cpfValidator)
+        CpfValidator cpfValidator,
+        ILogger<TelefoneService> logger)
     {
-        public async Task<PagedResult<TelefoneResponse>> ListAllTelefones(int page, int size,TipoTelefone? tipo = null,bool ativo = true,bool desc = false)
+        public async Task<PagedResult<TelefoneResponse>> ListAllTelefones(int page, int size, TipoTelefone? tipo = null, bool ativo = true, bool desc = false)
         {
             if (page < 1) page = 1;
             if (size < 1) size = 10;
@@ -135,7 +136,7 @@ namespace Agenda.Services
             Telefone telefone = new Telefone(novoTelefone.Tipo, numeroNormalizado, pessoa);
             db.Telefones.Add(telefone);
             await db.SaveChangesAsync();
-
+            logger.LogInformation("Telefone criado: {TelefoneId}", telefone.Id);
             return new TelefoneResponse(telefone);
         }
 
@@ -160,8 +161,8 @@ namespace Agenda.Services
 
             if (telefoneAtualizado.Tipo.HasValue)
                 telefone.Tipo = telefoneAtualizado.Tipo.Value;
-
             await db.SaveChangesAsync();
+            logger.LogInformation("Telefone atualizado: {TelefoneId}", telefone.Id);
             return new TelefoneResponse(telefone);
         }
 
@@ -170,6 +171,7 @@ namespace Agenda.Services
             var telefone = await FindByIdInternal(id);
             telefone.IsActive = false;
             await db.SaveChangesAsync();
+            logger.LogInformation("Telefone desativado: {TelefoneId}", telefone.Id);
         }
 
     }

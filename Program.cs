@@ -23,6 +23,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
+builder.Services.AddHealthChecks().AddDbContextCheck<AgendaContext>();
+
+
 DotNetEnv.Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -54,5 +57,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
