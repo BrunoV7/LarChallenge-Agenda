@@ -120,6 +120,8 @@ namespace Agenda.Services
             return new PessoaResponseDTO(existente);
         }
 
+        // Reativa todos os telefones inativos da pessoa, não só os desativados pela
+        // cascata do delete. Trade-off para manter a lógica simples.
         public async Task<PessoaResponseDTO> ReativarPessoa(string cpf)
         {
             if (string.IsNullOrWhiteSpace(cpf))

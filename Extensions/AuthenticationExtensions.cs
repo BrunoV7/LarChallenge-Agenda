@@ -28,7 +28,7 @@ namespace Agenda.Extensions
                     ValidAudience = jwt["Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
                      Encoding.UTF8.GetBytes(jwt["Key"]!)),
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero // desativa a folga padrão de 5min na expiração
                 };
             });
             services.AddAuthorization();

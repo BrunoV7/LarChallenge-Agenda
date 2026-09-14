@@ -17,6 +17,7 @@ builder.Services.AddScoped<PessoaService>();
 builder.Services.AddScoped<TelefoneService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CpfValidator>();
 builder.Services.AddScoped<TelefoneValidator>();
 
@@ -46,7 +47,7 @@ builder.Services.AddDbContext<AgendaContext>(options =>
 
 var app = builder.Build();
 
-// Faz o seed do usuário admin caso não exista
+// Cria um admin padrão se não houver nenhum admin ativo
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AgendaContext>();
