@@ -51,6 +51,8 @@ API REST para gerenciamento de uma agenda de contatos, permitindo o cadastro de 
    http://localhost:5132/scalar/
    ```
 
+> As datas usam o formato `dd/MM/yyyy` (ex.: `"21/03/1995"`), tanto na entrada quanto na saída.
+
 ## Autenticação
 
 A API usa autenticação JWT. Os endpoints de pessoas e telefones exigem um token válido; apenas o registro e o login são públicos.
@@ -61,6 +63,12 @@ Para obter um token:
 3. Envie o token no header `Authorization: Bearer {token}` nas demais requisições
 
 No Scalar, use o botão de autenticação para inserir o token e testar os endpoints protegidos.
+
+Um usuário administrador é criado automaticamente na primeira execução:
+- **Email:** `admin@agenda.com`
+- **Senha:** `Admin@123`
+
+Use essas credenciais no login para obter um token com acesso de administrador.
 
 ## Endpoints
 
@@ -93,6 +101,13 @@ No Scalar, use o botão de autenticação para inserir o token e testar os endpo
 | PUT | `/api/telefones/{id}` | Atualiza um telefone existente |
 | DELETE | `/api/telefones/{id}` | Remove um telefone (soft delete) |
 
+### Usuários (somente Admin)
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/api/users` | Lista usuários |
+| DELETE | `/api/users/{id}` | Desativa um usuário |
+
 As listagens aceitam os parâmetros de query `page` (padrão: 1) e `size` (padrão: 10, máximo: 100).
 
 ## Decisões de Design
@@ -112,8 +127,19 @@ CPF e telefone são validados antes de salvar — o CPF pelos dígitos verificad
 ### Telefone único por pessoa
 A duplicidade de telefone é verificada por pessoa: duas pessoas podem ter o mesmo número, mas a mesma pessoa não pode cadastrá-lo duas vezes.
 
+### Controle de acesso por role
+Usuários têm papel `Admin` ou `User`. As rotas de gerenciamento de usuários (`/api/users`) exigem papel `Admin`, verificado via `[Authorize(Roles = "Admin")]`. Um usuário comum autenticado recebe `403 Forbidden` nessas rotas.
+
 ### Outras práticas
-Erros são tratados por um `IExceptionHandler` global, convertendo exceções em respostas `ProblemDetails` (`400`, `404`, `500`) sem `try/catch` repetido nos controllers. As entidades não são expostas diretamente — DTOs definem o que entra e sai de cada endpoint, evitando referência circular entre `Pessoa` e `Telefone` e impedindo o retorno de dados internos como o hash da senha.d
+Erros são tratados por um `IExceptionHandler` global, convertendo exceções em respostas `ProblemDetails` (`400`, `404`, `500`) sem `try/catch` repetido nos controllers. As entidades não são expostas diretamente — DTOs definem o que entra e sai de cada endpoint, evitando referência circular entre `Pessoa` e `Telefone` e impedindo o retorno de dados internos como o hash da senha.
+
+## Limitações conhecidas
+
+- O CPF não pode ser alterado via update — o campo é ignorado no `PUT` de pessoa.
+- Ao reativar uma pessoa, todos os seus telefones inativos são reativados, incluindo os que haviam sido removidos individualmente antes.
+- Um CPF ou número de telefone removido permanece reservado. Não há endpoint de reativação de telefone.
+- Um administrador pode desativar a própria conta. Caso o sistema fique sem administradores ativos, o admin padrão é recriado na próxima inicialização.
+
 ## Testes
 
 O projeto inclui testes automatizados (xUnit) para as validações de CPF e telefone:
@@ -126,10 +152,11 @@ dotnet test
 
 ```
 Agenda/
-├── Controllers/     # Endpoints da API (Pessoa, Telefone, Auth)
+├── Controllers/     # Endpoints da API (Pessoa, Telefone, Auth, Users)
 ├── Services/        # Regras de negócio e acesso a dados
 ├── Validators/      # Validação de CPF e telefone
 ├── Extensions/      # Configuração de JWT e OpenAPI
+├── Converters/      # Conversor de data (dd/MM/yyyy)
 ├── Data/            # DbContext e configuração do banco
 ├── Models/          # Entidades de domínio (Pessoa, Telefone, User)
 ├── DTO/             # Objetos de transferência (request/response)
@@ -138,4 +165,4 @@ Agenda/
 └── Agenda.Tests/    # Testes automatizados (xUnit)
 ```
 
-O projeto segue uma separação em camadas: os **Controllers** lidam apenas com HTTP, os **Services** concentram a lógica de negócio, e o acesso a dados é feito via **Entity Framework Core** através do `DbContext`.
+O projeto segue uma separação em camadas: os **Controllers** lidam apenas com HTTP, os **Services** concentram a lógica de negócio, e o acesso a dados é feito via **Entity Framework Core** através do `DbContext
