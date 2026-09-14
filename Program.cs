@@ -51,6 +51,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AgendaContext>();
+
+    db.Database.Migrate();
+
     if (!await db.User.AnyAsync(u => u.Role == UserRole.Admin && u.IsActive))
     {
         db.User.Add(new User

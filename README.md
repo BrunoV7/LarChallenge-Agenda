@@ -30,26 +30,23 @@ API REST para gerenciamento de uma agenda de contatos, permitindo o cadastro de 
    cd LarChallenge-Agenda
    ```
 
-2. Configure as variáveis de ambiente. Copie o arquivo de exemplo e defina a chave JWT:
+2. Configure as variáveis de ambiente:
    ```bash
    cp .env.example .env
    ```
-   Abra o `.env` e defina `Jwt__Key` com uma chave secreta de no mínimo 32 caracteres.
+   Defina `Jwt__Key` no `.env` com uma chave de no mínimo 32 caracteres.
 
-3. Aplique as migrations para criar o banco de dados:
+3. Restaure as dependências:
    ```bash
-   dotnet ef database update
+   dotnet restore
    ```
 
-4. Execute a aplicação:
+4. Execute a aplicação (o banco é criado automaticamente na primeira execução):
    ```bash
    dotnet run
    ```
 
-5. Acesse a documentação interativa da API (Scalar):
-   ```
-   http://localhost:5132/scalar/
-   ```
+5. Acesse a documentação (Scalar): `http://localhost:5132/scalar/`
 
 > As datas usam o formato `dd/MM/yyyy` (ex.: `"21/03/1995"`), tanto na entrada quanto na saída.
 
