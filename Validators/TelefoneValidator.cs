@@ -1,6 +1,6 @@
 namespace Agenda.Validators
 {
-    public class TelefoneValidator
+    public class TelefoneValidator : ITelefoneValidator
     {
         public bool IsValid(string? telefone)
         {

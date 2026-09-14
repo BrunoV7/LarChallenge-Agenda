@@ -18,8 +18,8 @@ builder.Services.AddScoped<ITelefoneService, TelefoneService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<CpfValidator>();
-builder.Services.AddScoped<TelefoneValidator>();
+builder.Services.AddScoped<ICpfValidator, CpfValidator>();
+builder.Services.AddScoped<ITelefoneValidator, TelefoneValidator>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -31,6 +31,15 @@ builder.Services.AddHealthChecks().AddDbContextCheck<AgendaContext>();
 
 DotNetEnv.Env.Load();
 builder.Configuration.AddEnvironmentVariables();
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        "A chave JWT (Jwt__Key) não está configurada ou tem menos de 32 caracteres. " +
+        "Defina-a no arquivo .env (veja .env.example).");
+}
+
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

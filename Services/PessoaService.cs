@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Services
 {
-    public class PessoaService(AgendaContext db, CpfValidator cpfValidator, ILogger<PessoaService> logger) : IPessoaService
+    public class PessoaService(AgendaContext db, ICpfValidator cpfValidator, ILogger<PessoaService> logger) : IPessoaService
     {
         public async Task<PagedResult<PessoaResponseDTO>> ListAllPessoas(int page, int size, string? nome = null, bool ativo = true, bool desc = false)
         {

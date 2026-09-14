@@ -1,6 +1,6 @@
 namespace Agenda.Validators
 {
-    public class CpfValidator
+    public class CpfValidator : ICpfValidator
     {
         private const int TotalDigitos = 11;
 
