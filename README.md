@@ -113,7 +113,7 @@ CPF e telefone são validados antes de salvar — o CPF pelos dígitos verificad
 A duplicidade de telefone é verificada por pessoa: duas pessoas podem ter o mesmo número, mas a mesma pessoa não pode cadastrá-lo duas vezes.
 
 ### Outras práticas
-Erros são tratados por um `IExceptionHandler` global, convertendo exceções em respostas `ProblemDetails` (`400`, `404`, `500`) sem `try/catch` repetido nos controllers. As entidades não são expostas diretamente — DTOs definem o que entra e sai de cada endpoint, evitando referência circular entre `Pessoa` e `Telefone` e impedindo o retorno de dados internos como o hash da senha.
+Erros são tratados por um `IExceptionHandler` global, convertendo exceções em respostas `ProblemDetails` (`400`, `404`, `500`) sem `try/catch` repetido nos controllers. As entidades não são expostas diretamente — DTOs definem o que entra e sai de cada endpoint, evitando referência circular entre `Pessoa` e `Telefone` e impedindo o retorno de dados internos como o hash da senha.d
 ## Testes
 
 O projeto inclui testes automatizados (xUnit) para as validações de CPF e telefone:

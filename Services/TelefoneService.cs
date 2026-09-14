@@ -13,18 +13,25 @@ namespace Agenda.Services
         TelefoneValidator telefoneValidator,
         CpfValidator cpfValidator)
     {
-        public async Task<PagedResult<TelefoneResponse>> ListAllTelefones(int page, int size)
+        public async Task<PagedResult<TelefoneResponse>> ListAllTelefones(int page, int size,TipoTelefone? tipo = null,bool ativo = true,bool desc = false)
         {
             if (page < 1) page = 1;
             if (size < 1) size = 10;
             if (size > 100) size = 100;
 
-            var query = db.Telefones.Where(t => t.IsActive);
+            var query = db.Telefones.Where(t => t.IsActive == ativo);
+
+            if (tipo.HasValue)
+                query = query.Where(t => t.Tipo == tipo.Value);
+
             var totalItems = await query.CountAsync();
 
-            var telefones = await query
+            var ordenada = desc
+                ? query.OrderByDescending(t => t.Tipo)
+                : query.OrderBy(t => t.Tipo);
+
+            var telefones = await ordenada
                 .Include(t => t.Pessoa)
-                .OrderBy(t => t.Id)
                 .Skip((page - 1) * size)
                 .Take(size)
                 .ToListAsync();

@@ -9,18 +9,25 @@ namespace Agenda.Services
 {
     public class PessoaService(AgendaContext db, CpfValidator cpfValidator)
     {
-        public async Task<PagedResult<PessoaResponseDTO>> ListAllPessoas(int page, int size)
+        public async Task<PagedResult<PessoaResponseDTO>> ListAllPessoas(int page, int size, string? nome = null, bool ativo = true, bool desc = false)
         {
             if (page < 1) page = 1;
             if (size < 1) size = 10;
             if (size > 100) size = 100;
 
-            var query = db.Pessoas.Where(p => p.IsActive);
+            var query = db.Pessoas.Where(p => p.IsActive == ativo);
+
+            if (!string.IsNullOrWhiteSpace(nome))
+                query = query.Where(p => p.Name.Contains(nome));
+
             var totalItems = await query.CountAsync();
 
-            var pessoas = await query
+            var ordenada = desc
+                ? query.OrderByDescending(p => p.Name)
+                : query.OrderBy(p => p.Name);
+
+            var pessoas = await ordenada
                 .Include(p => p.Telefones)
-                .OrderBy(p => p.Id)
                 .Skip((page - 1) * size)
                 .Take(size)
                 .ToListAsync();
@@ -133,7 +140,7 @@ namespace Agenda.Services
             var cpfNormalizado = cpfValidator.Normalizar(cpf);
 
             var pessoa = await db.Pessoas
-                .FirstOrDefaultAsync(u => u.CPF == cpfNormalizado); 
+                .FirstOrDefaultAsync(u => u.CPF == cpfNormalizado);
 
             if (pessoa == null)
                 throw new KeyNotFoundException("Pessoa não encontrada.");
@@ -142,15 +149,30 @@ namespace Agenda.Services
                 throw new ArgumentException("Esta pessoa já está ativa.");
 
             pessoa.IsActive = true;
+
+            var telefones = await db.Telefones
+                .Where(t => t.IdPessoa == pessoa.Id && !t.IsActive)
+                .ToListAsync();
+
+            foreach (var telefone in telefones)
+                telefone.IsActive = true;
+
             await db.SaveChangesAsync();
 
             return new PessoaResponseDTO(pessoa);
         }
-
         public async Task<bool> DeletePessoa(string cpf)
         {
             Pessoa existente = await FindByCPFInternal(cpf);
             existente.IsActive = false;
+
+            var telefones = await db.Telefones
+                .Where(t => t.IdPessoa == existente.Id && t.IsActive)
+                .ToListAsync();
+
+            foreach (var telefone in telefones)
+                telefone.IsActive = false;
+
             await db.SaveChangesAsync();
             return true;
         }

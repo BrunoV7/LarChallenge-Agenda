@@ -13,16 +13,14 @@ namespace Agenda.Controllers
     public class TelefoneController(TelefoneService service) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<PagedResult<TelefoneResponse>>> BuscarTodos([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? cpf = null, [FromQuery] string? telefone = null)
+        public async Task<ActionResult<PagedResult<TelefoneResponse>>> BuscarTodos([FromQuery] int page = 1,[FromQuery] int size = 10,[FromQuery] string? cpf = null,[FromQuery] TipoTelefone? tipo = null,[FromQuery] bool ativo = true,[FromQuery] bool desc = false)
         {
             if (!string.IsNullOrWhiteSpace(cpf))
             {
                 return Ok(await service.FindAllTelefonesByCpf(cpf, page, size));
             }
-            else
-            {
-                return Ok(await service.ListAllTelefones(page, size));
-            }
+
+            return Ok(await service.ListAllTelefones(page, size, tipo, ativo, desc));
         }
 
 

@@ -13,9 +13,11 @@ namespace Agenda.Controllers
     public class PessoaController(PessoaService service) : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult<PagedResult<PessoaResponseDTO>>> BuscarTodos([FromQuery] int page = 1, [FromQuery] int size = 10)
+        public async Task<ActionResult<PagedResult<PessoaResponseDTO>>> BuscarTodos(
+            [FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? nome = null, 
+            [FromQuery] bool ativo = true, [FromQuery] bool desc = false)
         {
-            return Ok(await service.ListAllPessoas(page, size));
+            return Ok(await service.ListAllPessoas(page, size, nome, ativo, desc));
         }
 
         [HttpGet("{cpf}")]
