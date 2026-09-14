@@ -1,5 +1,7 @@
+using Agenda.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Agenda.Middleware
 {
@@ -18,7 +20,10 @@ namespace Agenda.Middleware
             var (status, detail) = exception switch
             {
                 KeyNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
+                ConflictException => (StatusCodes.Status409Conflict, exception.Message),
+                ArgumentNullException => (StatusCodes.Status500InternalServerError, "Ocorreu um erro interno no servidor."),
                 ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),
+                DbUpdateException => (StatusCodes.Status409Conflict, "Registro duplicado."),
                 _ => (StatusCodes.Status500InternalServerError, "Ocorreu um erro interno no servidor.")
             };
 

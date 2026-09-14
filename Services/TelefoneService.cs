@@ -1,5 +1,6 @@
 using Agenda.Data;
 using Agenda.DTOs;
+using Agenda.Exceptions;
 using Agenda.Models;
 using Agenda.Validators;
 using DTO.requests;
@@ -55,6 +56,10 @@ namespace Agenda.Services
 
         public async Task<PagedResult<TelefoneResponse>> FindAllTelefonesByCpf(string cpf, int page, int size)
         {
+            if (page < 1) page = 1;
+            if (size < 1) size = 10;
+            if (size > 100) size = 100;
+
             if (!cpfValidator.IsValid(cpf))
                 throw new ArgumentException("CPF inválido.");
 
@@ -129,11 +134,13 @@ namespace Agenda.Services
                 throw new ArgumentException("Número de telefone inválido.");
 
             var numeroNormalizado = telefoneValidator.Normalizar(novoTelefone.Numero);
+            if (!novoTelefone.Tipo.HasValue)
+                throw new ArgumentException("O tipo de telefone é obrigatório.");
 
             if (await ExistsByNumero(numeroNormalizado, pessoa.Id))
-                throw new ArgumentException("Esta pessoa já possui um telefone com este número.");
+                throw new ConflictException("Esta pessoa já possui um telefone com este número.");
 
-            Telefone telefone = new Telefone(novoTelefone.Tipo, numeroNormalizado, pessoa);
+            Telefone telefone = new Telefone(novoTelefone.Tipo.Value, numeroNormalizado, pessoa);
             db.Telefones.Add(telefone);
             await db.SaveChangesAsync();
             logger.LogInformation("Telefone criado: {TelefoneId}", telefone.Id);
@@ -154,7 +161,7 @@ namespace Agenda.Services
                 if (numeroNormalizado != telefone.Numero)
                 {
                     if (await ExistsByNumero(numeroNormalizado, telefone.IdPessoa, id))
-                        throw new ArgumentException("Esta pessoa já possui um telefone com este número.");
+                        throw new ConflictException("Esta pessoa já possui um telefone com este número.");
                     telefone.Numero = numeroNormalizado;
                 }
             }
