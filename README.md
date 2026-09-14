@@ -140,7 +140,10 @@ Erros são tratados por um `IExceptionHandler` global, convertendo exceções em
 
 ## Testes
 
-O projeto inclui testes automatizados (xUnit) para as validações de CPF e telefone:
+O projeto inclui testes automatizados (xUnit) em três níveis:
+- **Validadores** — regras de CPF e telefone
+- **Serviços** — regras de negócio de Pessoa e Telefone (com EF Core InMemory e Moq)
+- **Integração** — autenticação e endpoints via HTTP (WebApplicationFactory)
 
 ```bash
 dotnet test
