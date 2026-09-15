@@ -23,7 +23,7 @@ builder.Services.AddScoped<ITelefoneValidator, TelefoneValidator>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: false));
     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
 });
 

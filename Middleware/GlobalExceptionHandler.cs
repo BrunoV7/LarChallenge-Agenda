@@ -24,6 +24,7 @@ namespace Agenda.Middleware
                 ArgumentNullException => (StatusCodes.Status500InternalServerError, "Ocorreu um erro interno no servidor."),
                 ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),
                 DbUpdateException => (StatusCodes.Status409Conflict, "Registro duplicado."),
+                UnauthorizedException => (StatusCodes.Status401Unauthorized, exception.Message),
                 _ => (StatusCodes.Status500InternalServerError, "Ocorreu um erro interno no servidor.")
             };
 

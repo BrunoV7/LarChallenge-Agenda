@@ -12,19 +12,13 @@ namespace Agenda.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody] UserRegisterRequest request)
         {
-            var result = await service.Register(request);
-            return result is null
-                ? Conflict("E-mail já cadastrado.")
-                : Ok(result);
+            return Ok(await service.Register(request));
         }
 
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] UserLoginRequest request)
         {
-            var result = await service.Login(request);
-            return result is null
-                ? Unauthorized("Credenciais inválidas.")
-                : Ok(result);
+            return Ok(await service.Login(request));
         }
 
     }

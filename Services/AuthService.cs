@@ -1,5 +1,6 @@
 using Agenda.Data;
 using Agenda.DTOs;
+using Agenda.Exceptions;
 using Agenda.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,15 +8,17 @@ namespace Agenda.Services;
 
 public class AuthService(AgendaContext context, ITokenService tokenService, ILogger<AuthService> logger) : IAuthService
 {
-    public async Task<TokenResponse?> Register(UserRegisterRequest request)
+    public async Task<TokenResponse> Register(UserRegisterRequest request)
     {
-        if (await context.User.AnyAsync(u => u.Email == request.Email))
-            return null;
+        var email = request.Email.Trim().ToLower();
+
+        if (await context.User.AnyAsync(u => u.Email == email))
+            throw new ConflictException("E-mail já cadastrado.");
 
         var user = new User
         {
             Nome = request.Nome,
-            Email = request.Email,
+            Email = email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Role = UserRole.User
         };
@@ -26,18 +29,20 @@ public class AuthService(AgendaContext context, ITokenService tokenService, ILog
         return tokenService.GerarToken(user);
     }
 
-    public async Task<TokenResponse?> Login(UserLoginRequest request)
+    public async Task<TokenResponse> Login(UserLoginRequest request)
     {
-        var user = await context.User
-            .FirstOrDefaultAsync(u => u.Email == request.Email && u.IsActive);
+        var email = request.Email.Trim().ToLower();
 
-        if (user is null ||
-            !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        var user = await context.User
+            .FirstOrDefaultAsync(u => u.Email == email && u.IsActive);
+
+        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
-            logger.LogWarning("Tentativa de login falha: {Email}", request.Email);
-            return null;
+            logger.LogWarning("Tentativa de login falha: {Email}", email);
+            throw new UnauthorizedException("Credenciais inválidas.");  
         }
-        logger.LogInformation("Login bem-sucedido: {Email}", request.Email);
+
+        logger.LogInformation("Login bem-sucedido: {Email}", email);
         return tokenService.GerarToken(user);
     }
 }

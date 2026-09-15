@@ -102,7 +102,7 @@ namespace Agenda.Services
             if (await ExistsWithCPF(cpfNormalizado))
                 throw new ConflictException("Já existe um usuário cadastrado com este CPF.");
 
-            Pessoa pessoa = new Pessoa(novaPessoa.Nome, cpfNormalizado, novaPessoa.DataNascimento);
+            Pessoa pessoa = new Pessoa(novaPessoa.Nome.Trim(), cpfNormalizado, novaPessoa.DataNascimento);
 
             db.Pessoas.Add(pessoa);
             await db.SaveChangesAsync();
@@ -115,7 +115,7 @@ namespace Agenda.Services
             Pessoa existente = await FindByCPFInternal(cpf);
 
             if (!string.IsNullOrWhiteSpace(novaPessoa.Nome))
-                existente.Nome = novaPessoa.Nome;
+                existente.Nome = novaPessoa.Nome.Trim();
 
             if (novaPessoa.DataNascimento != DateOnly.MinValue)
             {
