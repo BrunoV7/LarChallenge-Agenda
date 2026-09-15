@@ -14,7 +14,7 @@ namespace Agenda.Controllers
     {
         [HttpGet]
         public async Task<ActionResult<PagedResult<PessoaResponseDTO>>> BuscarTodos(
-            [FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? nome = null, 
+            [FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? nome = null,
             [FromQuery] bool ativo = true, [FromQuery] bool desc = false)
         {
             return Ok(await service.ListAllPessoas(page, size, nome, ativo, desc));
@@ -34,7 +34,7 @@ namespace Agenda.Controllers
         }
 
         [HttpPut("{cpf}")]
-        public async Task<ActionResult<PessoaResponseDTO>> Atualizar(string cpf, [FromBody] PessoaRequestDTO pessoa)
+        public async Task<ActionResult<PessoaResponseDTO>> Atualizar(string cpf, [FromBody] PessoaUpdateRequest pessoa)
         {
             return Ok(await service.UpdatePessoa(cpf, pessoa));
         }

@@ -1,5 +1,6 @@
 using Agenda.DTOs;
 using Agenda.Models;
+using DTO.requests;
 
 namespace Agenda.Services
 {
@@ -10,7 +11,7 @@ namespace Agenda.Services
         Task<Pessoa> FindByCPFInternal(string cpf);
         Task<Pessoa> FindByIdInternal(Guid id);
         Task<PessoaResponseDTO> CreatePessoa(PessoaRequestDTO novaPessoa);
-        Task<PessoaResponseDTO> UpdatePessoa(string cpf, PessoaRequestDTO novaPessoa);
+        Task<PessoaResponseDTO> UpdatePessoa(string cpf, PessoaUpdateRequest novaPessoa);
         Task<PessoaResponseDTO> ReativarPessoa(string cpf);
         Task<bool> DeletePessoa(string cpf);
     }

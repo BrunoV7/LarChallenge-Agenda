@@ -110,18 +110,20 @@ namespace Agenda.Services
             return new PessoaResponseDTO(pessoa);
         }
 
-        public async Task<PessoaResponseDTO> UpdatePessoa(string cpf, PessoaRequestDTO novaPessoa)
+        public async Task<PessoaResponseDTO> UpdatePessoa(string cpf, PessoaUpdateRequest novaPessoa)
         {
             Pessoa existente = await FindByCPFInternal(cpf);
 
             if (!string.IsNullOrWhiteSpace(novaPessoa.Nome))
                 existente.Nome = novaPessoa.Nome.Trim();
 
-            if (novaPessoa.DataNascimento != DateOnly.MinValue)
+            if (novaPessoa.DataNascimento.HasValue)
             {
-                if (novaPessoa.DataNascimento > DateOnly.FromDateTime(DateTime.Today))
+                if (novaPessoa.DataNascimento.Value == DateOnly.MinValue)
+                    throw new ArgumentException("Data de nascimento inválida.");
+                if (novaPessoa.DataNascimento.Value > DateOnly.FromDateTime(DateTime.Today))
                     throw new ArgumentException("Data de nascimento não pode ser no futuro.");
-                existente.DataNascimento = novaPessoa.DataNascimento;
+                existente.DataNascimento = novaPessoa.DataNascimento.Value;
             }
 
             await db.SaveChangesAsync();

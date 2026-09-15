@@ -135,6 +135,7 @@ Erros são tratados por um `IExceptionHandler` global, convertendo exceções em
 - O CPF não pode ser alterado via update — o campo é ignorado no `PUT` de pessoa.
 - Ao reativar uma pessoa, todos os seus telefones inativos são reativados, incluindo os que haviam sido removidos individualmente antes.
 - Um CPF ou número de telefone removido permanece reservado. Não há endpoint de reativação de telefone.
+- A busca por nome ignora maiúsculas e minúsculas, mas é sensível a acentos (ex.: "alvaro" não encontra "Álvaro").
 - Um administrador pode desativar a própria conta. Caso o sistema fique sem administradores ativos, o admin padrão é recriado na próxima inicialização.
 - **Tokens JWT são stateless:** um usuário desativado mantém acesso até o token expirar (60 min). Revogação imediata exigiria tokens de curta duração com refresh ou validação de estado a cada requisição.
 
